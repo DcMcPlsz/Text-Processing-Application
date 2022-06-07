@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch TextFileReader",
+      "request": "launch",
+      "mainClass": "TextFileReader",
+      "projectName": "Text-Processing-Application_6850469d"
+    }
+  ]
+}
