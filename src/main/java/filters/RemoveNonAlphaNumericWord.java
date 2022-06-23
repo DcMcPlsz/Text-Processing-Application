@@ -1,9 +1,6 @@
 package filters;
 
-import java.util.concurrent.CountDownLatch;
-import akka.*;
 import akka.actor.ActorRef;
-import akka.actor.UntypedAbstractActor;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;

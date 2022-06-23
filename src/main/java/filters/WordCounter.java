@@ -1,9 +1,9 @@
 package filters;
 
-import java.util.concurrent.CountDownLatch;
-import akka.*;
-import akka.actor.*;
-import akka.event.*;
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 
 public class WordCounter extends UntypedActor {
 
