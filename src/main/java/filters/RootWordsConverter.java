@@ -21,11 +21,11 @@ public class RootWordsConverter extends UntypedActor {
         String[] message = (String[]) previous;
         String[] output = { "" };
         Stemmer stemmer = new Stemmer();
-        for (String s : message) {
-            stemmer.add(word.toCharArray(), word.length());
+        for (int i=0; i<message.length; i++) {
+            stemmer.add(message[i].toCharArray(), message[i].length());
             stemmer.stem();
             String stem = stemmer.toString();
-            output[s] = stem;
+            output[i] = stem;
         }
         nextActor.tell(output, getSelf());
     }

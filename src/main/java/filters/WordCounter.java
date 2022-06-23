@@ -20,10 +20,10 @@ public class WordCounter extends UntypedActor {
 
         String[] message = (String[]) previous;
         int output = 0;
-        for (String s : message) {
+        for (int i=0; i<message.length; i++) {
             output++;
         }
-
-        // return output;
+        nextActor.tell(output, getSelf());
+        
     }
 }
