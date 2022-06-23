@@ -3,7 +3,6 @@ import akka.*;
 import akka.actor.UntypedAbstractActor;
 import akka.event.LoggingAdapter;
 
-
 public class LowercaseTransformer extends UntypedActor {
     
     private ActorRef nextActor;
