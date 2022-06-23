@@ -3,8 +3,8 @@ import akka.*;
 import akka.actor.*;
 import akka.event.*;
 
-public class WordCounter extends UntypedActor{
-    
+public class WordCounter extends UntypedActor {
+
     private ActorRef nextActor;
     private LoggingAdapter log = Logging.getLogger(getContext().System(), this);
 
@@ -25,4 +25,3 @@ public class WordCounter extends UntypedActor{
         return output;
     }
 }
-
