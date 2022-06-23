@@ -1,4 +1,4 @@
-//package pipefilter.filter;
+package filters;
 
 import akka.actor.{ Actor, ActorRef, Props, ActorSystem };
 

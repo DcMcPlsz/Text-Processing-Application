@@ -1,11 +1,15 @@
+package filters;
+
 import java.util.LinkedList;
-import akka.*;
-import akka.actor.UntypedAbstractActor;
+
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
 public class StopWordsRemover extends UntypedActor {
     private ActorRef nextActor;
-    private LoggingAdapter log = Logging.getLogger(getContext().System(), this);
+    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private LinkedList<String> input;
     private LinkedList<String> output;
@@ -84,16 +88,16 @@ public class StopWordsRemover extends UntypedActor {
         log.info("The message is received: " + previousmessage);
 
         String message = (String) previousmessage;
-        for (int i = 0; i < input.size(); i++) {
+        for (int i = 0; i < ((LinkedList<String>) previousmessage).size(); i++) {
             boolean noEqual = true;
             for (int j = 0; j < STOP_WORDS.length; j++) {
-                if (input.get(i).equals(STOP_WORDS[j])) {
+                if (((LinkedList<String>) previousmessage).get(i).equals(STOP_WORDS[j])) {
                     noEqual = false;
                     break;
                 }
             }
             if (noEqual) {
-                output.add(input.get(i));
+                output.add(((LinkedList<String>) previousmessage).get(i));
             }
         }
         nextActor.tell(output, getSelf());

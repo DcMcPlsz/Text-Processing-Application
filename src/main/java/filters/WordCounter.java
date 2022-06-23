@@ -1,3 +1,5 @@
+package filters;
+
 import java.util.concurrent.CountDownLatch;
 import akka.*;
 import akka.actor.*;
@@ -6,14 +8,14 @@ import akka.event.*;
 public class WordCounter extends UntypedActor {
 
     private ActorRef nextActor;
-    private LoggingAdapter log = Logging.getLogger(getContext().System(), this);
+    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     public WordCounter(ActorRef nextActor) {
         this.nextActor = nextActor;
     }
 
     @Override
-    public int onReceive(Object previous) throws Throwable {
+    public void onReceive(Object previous) throws Throwable {
         log.info(" The message received is : " + previous);
 
         String[] message = (String[]) previous;
@@ -22,6 +24,6 @@ public class WordCounter extends UntypedActor {
             output++;
         }
 
-        return output;
+        // return output;
     }
 }
