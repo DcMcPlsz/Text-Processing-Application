@@ -98,17 +98,4 @@ public class StopWordsRemover extends UntypedActor {
         }
         nextActor.tell(output, getSelf());
     }
-
-    // public StopWordsRemover(LinkedList<String> input) {
-    // this.input = input;
-    // }
-
-    @Override
-    public void run() {
-        onReceive();
-    }
-
-    public LinkedList<String> getStopWordsRemoverOutput() {
-        return output;
-    }
 }
