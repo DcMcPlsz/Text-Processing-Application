@@ -1,25 +1,33 @@
 package filters;
 
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class LowercaseTransformer extends UntypedActor {
+import pipes.Pipe;
+import pipes.PipeImpl;
 
-    private ActorRef nextActor;
-    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+public class LowercaseTransformer {
 
-    public LowercaseTransformer(ActorRef nextActor) {
-        this.nextActor = nextActor;
+    private Pipe<LinkedList<String>> words;
+    private Pipe<LinkedList<String>> output = new PipeImpl<LinkedList<String>>();
+
+    public LowercaseTransformer(Pipe<LinkedList<String>> words) {
+        this.words = words;
     }
 
-    @Override
-    public void onReceive(Object previousmessage) throws Throwable {
-        log.info("Received" + previousmessage);
-        String message = (String) previousmessage;
-        String output = message.toLowerCase();
-        nextActor.tell(output, getSelf());
+    public Pipe<LinkedList<String>> transforming() throws InterruptedException {
+
+        List<String> temp = words.nextOrNullIfEmptied().stream().map(word -> word.toLowerCase())
+                .collect(Collectors.toList());
+
+        LinkedList<String> results = new LinkedList<String>();
+        for (String lowerCaseWord : temp) {
+            results.add(lowerCaseWord);
+        }
+
+        output.put(results);
+        return output;
     }
 
 }

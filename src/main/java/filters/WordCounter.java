@@ -1,56 +1,35 @@
 package filters;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
+import pipes.Pipe;
+import pipes.PipeImpl;
 
-public class WordCounter extends UntypedActor {
+public class WordCounter {
 
-    private ActorRef nextActor;
-    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-    private int output = 0;
+    private Pipe<String[]> words;
+    private Pipe<LinkedList<String>> output = new PipeImpl<LinkedList<String>>();
+    // private int output = 0;
 
-    public WordCounter(ActorRef nextActor) {
-        this.nextActor = nextActor;
+    public WordCounter(Pipe<String[]> words) {
+        this.words = words;
     }
 
-    @Override
-    public void onReceive(Object previous) throws Throwable {
-        log.info(" The message received is : " + previous);
+    public void counting() throws InterruptedException {
 
-        String[] message = (String[]) previous;
-        for  (int i = 0; i < message.length; i++) {
+        HashMap<String, Integer> counter = new HashMap<String, Integer>();
 
-            int count = 1; 
-            if (message[i]!=null)
-                System.out.println("Word: " + message[i] + " Count: " + count);
-            
-            for(int j = i+1; j < message.length; j++) { 
-                if (message[j]!=null) {
-                        if(message[i].equals(message[j])) {    
-                        count++; 
-                        if (message[j]!=null){
-                            System.out.println("Word: " + message[j] + " Count: " + count);
-                            message[j] = null; 
-                        }
-
-
-                    }  
-                }
-                  
-            }  
-
-            output++; 
+        for (String word : words.nextOrNullIfEmptied()) {
+            if (!counter.containsKey(word)) {
+                counter.put(word, 1);
+            } else {
+                counter.put(word, counter.get(word) + 1);
+            }
         }
-        
-        nextActor.tell(output, getSelf());
-
-    public int getNumCount() {
-        return output;
+        System.out.println(counter);
     }
 
 }

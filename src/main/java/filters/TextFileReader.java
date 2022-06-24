@@ -3,13 +3,10 @@ package filters;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
-import java.util.Scanner; // Import the Scanner class to read text files
+import java.util.Scanner;
 
-import pipes.*;
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
+import pipes.Pipe;
+import pipes.PipeImpl;
 
 public class TextFileReader {
     // private ActorRef nextActor;
@@ -26,7 +23,7 @@ public class TextFileReader {
         this.file = file;
     }
 
-    public LinkedList<String> reading() throws InterruptedException, FileNotFoundException {
+    public Pipe<LinkedList<String>> reading() throws InterruptedException, FileNotFoundException {
         // log.info("The file is received" + previousmessage);
         LinkedList<String> lines = new LinkedList<String>();
         File fileObject = new File(file.nextOrNullIfEmptied());
@@ -34,11 +31,10 @@ public class TextFileReader {
         while (fileReader.hasNextLine()) {
             String data = fileReader.nextLine();
             lines.add(data);
-            System.out.println(data);
         }
         fileReader.close();
         output.put(lines);
-        return output.nextOrNullIfEmptied();
+        return output;
         // nextActor.tell(lines, getSelf());
 
     }

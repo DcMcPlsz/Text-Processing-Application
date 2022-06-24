@@ -1,22 +1,20 @@
-package filters;
+package filtersAkka;
 
 import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import pipes.Pipe;
-import pipes.PipeImpl;
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 
-public class StopWordsRemover {
+public class StopWordsRemoverAkka extends UntypedActor {
+    private ActorRef nextActor;
+    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-    private Pipe<LinkedList<String>> words;
-    private Pipe<LinkedList<String>> output = new PipeImpl<LinkedList<String>>();
+    private LinkedList<String> input;
+    private LinkedList<String> output;
 
-    public StopWordsRemover(Pipe<LinkedList<String>> words) {
-        this.words = words;
-    }
-
-    public static String[] STOP_WORDS = { "", "a", "able", "about", "above", "abst", "accordance", "according",
+    public static String[] STOP_WORDS = { "a", "able", "about", "above", "abst", "accordance", "according",
             "accordingly", "across", "act", "actually", "added", "adj", "affected", "affecting", "affects", "after",
             "afterwards", "again", "against", "ah", "all", "almost", "alone", "along", "already", "also", "although",
             "always", "am", "among", "amongst", "an", "and", "announce", "another", "any", "anybody", "anyhow",
@@ -81,29 +79,34 @@ public class StopWordsRemover {
      * List of words from https://www.ranks.nl/stopwords and
      * prepared into a text file by Professor Engelhardt.
      */
-
-    public Pipe<LinkedList<String>> removing() throws InterruptedException {
-        List<String> temp = words.nextOrNullIfEmptied().stream().filter(word -> filter(word))
-                .collect(Collectors.toList());
-
-        LinkedList<String> results = new LinkedList<String>();
-        for (String lowerCaseWord : temp) {
-            results.add(lowerCaseWord);
-        }
-
-        output.put(results);
-
-        return output;
+    public StopWordsRemoverAkka(ActorRef nextActor) {
+        this.nextActor = nextActor;
     }
 
-    private boolean filter(String word) {
-        boolean noEqual = true;
-        for (int j = 0; j < STOP_WORDS.length; j++) {
-            if (word.equals(STOP_WORDS[j])) {
-                noEqual = false;
-                break;
+    @Override
+    public void onReceive(Object previousmessage) throws Throwable {
+        log.info("The message is received: " + previousmessage);
+
+        try {
+            if (previousmessage instanceof LinkedList) {
+                input = (LinkedList<String>) previousmessage;
+            }
+        } catch (ClassCastException e) {
+            System.out.println("Error casting " + e);
+        }
+
+        for (int i = 0; i < input.size(); i++) {
+            boolean noEqual = true;
+            for (int j = 0; j < STOP_WORDS.length; j++) {
+                if (input.get(i).equals(STOP_WORDS[j])) {
+                    noEqual = false;
+                    break;
+                }
+            }
+            if (noEqual) {
+                output.add(input.get(i));
             }
         }
-        return noEqual;
+        nextActor.tell(output, getSelf());
     }
 }

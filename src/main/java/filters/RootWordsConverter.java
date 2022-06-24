@@ -1,32 +1,34 @@
 package filters;
 
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
+import java.util.LinkedList;
 
-public class RootWordsConverter extends UntypedActor {
+import pipes.Pipe;
+import pipes.PipeImpl;
 
-    private ActorRef nextActor;
-    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+public class RootWordsConverter {
 
-    public void WordCounter(ActorRef nextActor) {
-        this.nextActor = nextActor;
+    private Pipe<LinkedList<String>> words;
+    private Pipe<String[]> output = new PipeImpl<String[]>();
+
+    public RootWordsConverter(Pipe<LinkedList<String>> words) {
+        this.words = words;
     }
 
-    @Override
-    public void onReceive(Object previous) throws Throwable {
-        log.info(" The message received is : " + previous);
+    public Pipe<String[]> converting() throws InterruptedException {
 
-        String[] message = (String[]) previous;
-        String[] output = { "" };
+        LinkedList<String> temp = new LinkedList<String>();
         Stemmer stemmer = new Stemmer();
-        for (int i = 0; i < message.length; i++) {
-            stemmer.add(message[i].toCharArray(), message[i].length());
+
+        for (String word : words.nextOrNullIfEmptied()) {
+            stemmer.add(word.toCharArray(), word.length());
             stemmer.stem();
-            String stem = stemmer.toString();
-            output[i] = stem;
+            temp.add(stemmer.toString());
         }
-        nextActor.tell(output, getSelf());
+
+        String[] results = temp.toArray(new String[temp.size()]);
+
+        output.put(results);
+        return output;
     }
+
 }

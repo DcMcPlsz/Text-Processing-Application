@@ -1,27 +1,31 @@
 package filters;
 
-import akka.actor.ActorRef;
-import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class WordBoundaryTokenizer extends UntypedActor {
+import pipes.Pipe;
+import pipes.PipeImpl;
 
-    private ActorRef nextActor;
-    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+public class WordBoundaryTokenizer {
 
-    public void WordBoundaryTokenizern(ActorRef nextActor) {
-        this.nextActor = nextActor;
+    private Pipe<LinkedList<String>> lines;
+    private Pipe<LinkedList<String>> output = new PipeImpl<LinkedList<String>>();
+
+    public WordBoundaryTokenizer(Pipe<LinkedList<String>> lines) {
+        this.lines = lines;
     }
 
-    @Override
-    public void onReceive(Object line) throws Throwable {
-        log.info(" The message received is : " + line);
-        String lines = "FileToBeRead.txt";
-        String[] message = lines.split(" ");
-        for (String s : message) {
-            nextActor.tell(s, getSelf());
-            System.out.println(s);
+    public Pipe<LinkedList<String>> splitting() throws InterruptedException {
+        List<String> temp = lines.nextOrNullIfEmptied().stream().map(line -> Arrays.asList(line.split(" ")))
+                .flatMap(List::stream).collect(Collectors.toList());
+        LinkedList<String> results = new LinkedList<String>();
+        for (String word : temp) {
+            results.add(word);
         }
+
+        output.put(results);
+        return output;
     }
 }
