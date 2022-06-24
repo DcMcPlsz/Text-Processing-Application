@@ -1,9 +1,9 @@
 package filters;
 
-import java.util.concurrent.CountDownLatch;
-import akka.*;
-import akka.actor.*;
-import akka.event.*;
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 
 public class RootWordsConverter extends UntypedActor {
 
@@ -21,7 +21,7 @@ public class RootWordsConverter extends UntypedActor {
         String[] message = (String[]) previous;
         String[] output = { "" };
         Stemmer stemmer = new Stemmer();
-        for (int i=0; i<message.length; i++) {
+        for (int i = 0; i < message.length; i++) {
             stemmer.add(message[i].toCharArray(), message[i].length());
             stemmer.stem();
             String stem = stemmer.toString();

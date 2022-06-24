@@ -87,17 +87,24 @@ public class StopWordsRemover extends UntypedActor {
     public void onReceive(Object previousmessage) throws Throwable {
         log.info("The message is received: " + previousmessage);
 
-        String message = (String) previousmessage;
-        for (int i = 0; i < ((LinkedList<String>) previousmessage).size(); i++) {
+        try {
+            if (previousmessage instanceof LinkedList) {
+                input = (LinkedList<String>) previousmessage;
+            }
+        } catch (ClassCastException e) {
+            System.out.println("Error casting " + e);
+        }
+
+        for (int i = 0; i < input.size(); i++) {
             boolean noEqual = true;
             for (int j = 0; j < STOP_WORDS.length; j++) {
-                if (((LinkedList<String>) previousmessage).get(i).equals(STOP_WORDS[j])) {
+                if (input.get(i).equals(STOP_WORDS[j])) {
                     noEqual = false;
                     break;
                 }
             }
             if (noEqual) {
-                output.add(((LinkedList<String>) previousmessage).get(i));
+                output.add(input.get(i));
             }
         }
         nextActor.tell(output, getSelf());

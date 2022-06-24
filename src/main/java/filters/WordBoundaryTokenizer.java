@@ -1,25 +1,27 @@
-//package pipefilter.filter;
-import akka.*;
-import akka.actor.UntypedAbstractActor;
+package filters;
+
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
+public class WordBoundaryTokenizer extends UntypedActor {
 
-public class WordBoundaryTokenization extends UntypedActor{
-    
-  private ActorRef nextActor;
-  private LoggingAdapter log = Logging.getLogger(getContext().System(), this);
+    private ActorRef nextActor;
+    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-  public WordBoundaryTokenization(ActorRef nextActor) {
-      this.nextActor = nextActor;
-  }
+    public void WordBoundaryTokenizern(ActorRef nextActor) {
+        this.nextActor = nextActor;
+    }
 
-  @Override
-  public int onReceive(Object line) throws Throwable {
-      log.info(" The message received is : " + line);
-      String lines = "file.txt";
-      String[] message = lines.split(" ");
-      for (String s : message) {
-          System.out.println(s);
-      }
-  }
+    @Override
+    public void onReceive(Object line) throws Throwable {
+        log.info(" The message received is : " + line);
+        String lines = "FileToBeRead.txt";
+        String[] message = lines.split(" ");
+        for (String s : message) {
+            nextActor.tell(s, getSelf());
+            System.out.println(s);
+        }
+    }
 }
