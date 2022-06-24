@@ -15,6 +15,7 @@ public class App {
         Pipe<String> file = new PipeImpl<String>();
         file.put("FileToBeRead.txt");
         TextFileReader fileReader = new TextFileReader(file);
+        file.closeForWriting();
         WordBoundaryTokenizer splitter = new WordBoundaryTokenizer(fileReader.reading());
         RemoveNonAlphaNumericWord remover = new RemoveNonAlphaNumericWord(splitter.splitting());
         LowercaseTransformer transformer = new LowercaseTransformer(remover.removing());

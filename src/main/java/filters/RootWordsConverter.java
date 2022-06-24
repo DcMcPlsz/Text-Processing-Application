@@ -8,26 +8,30 @@ import pipes.PipeImpl;
 public class RootWordsConverter {
 
     private Pipe<LinkedList<String>> words;
-    private Pipe<String[]> output = new PipeImpl<String[]>();
+    private Pipe<LinkedList<String>> output = new PipeImpl<LinkedList<String>>();
 
+    // constructor
     public RootWordsConverter(Pipe<LinkedList<String>> words) {
         this.words = words;
     }
 
-    public Pipe<String[]> converting() throws InterruptedException {
+    public Pipe<LinkedList<String>> converting() throws InterruptedException {
+        LinkedList<String> result = new LinkedList<String>(); // create a linkedlist for output
+        Stemmer stemmer = new Stemmer(); // create a instance of stemmer
 
-        LinkedList<String> temp = new LinkedList<String>();
-        Stemmer stemmer = new Stemmer();
-
+        // loop through the linkedlist of words
         for (String word : words.nextOrNullIfEmptied()) {
+            // for each word add into the stemmer
             stemmer.add(word.toCharArray(), word.length());
+            // remove the root words for each word
             stemmer.stem();
-            temp.add(stemmer.toString());
+            // add the result into the temporary linkedlist
+            result.add(stemmer.toString());
         }
+        words.closeForWriting(); // close the pipe after done using
 
-        String[] results = temp.toArray(new String[temp.size()]);
-
-        output.put(results);
+        output.put(result); // put the result into pipe
+        output.closeForWriting(); // close the pipe after done using
         return output;
     }
 

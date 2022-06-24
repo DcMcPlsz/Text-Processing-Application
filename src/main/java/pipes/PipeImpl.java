@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
-// replaceable with BlockingQueue<T>? That doesn't support closing, though
 public class PipeImpl<T> implements Pipe<T> {
     private Queue<T> buffer = new LinkedList<T>();
     private boolean isOpenForWriting = true;
@@ -17,13 +16,11 @@ public class PipeImpl<T> implements Pipe<T> {
             throw new RuntimeException(new IOException("pipe is closed; cannot write to it"));
         } else if (obj == null) {
             throw new IllegalArgumentException(
-
                     "cannot put null in pipe; null is reserved for pipe-empty sentinel value");
         }
 
         boolean wasAdded = buffer.add(obj);
         notify();
-        // System.out.println("added to pipe: " + (obj==null?"<null>":obj.toString()));
         return wasAdded;
     }
 

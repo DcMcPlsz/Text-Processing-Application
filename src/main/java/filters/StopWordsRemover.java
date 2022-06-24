@@ -12,10 +12,12 @@ public class StopWordsRemover {
     private Pipe<LinkedList<String>> words;
     private Pipe<LinkedList<String>> output = new PipeImpl<LinkedList<String>>();
 
+    // constructor
     public StopWordsRemover(Pipe<LinkedList<String>> words) {
         this.words = words;
     }
 
+    // create an array of stop words to do comparation
     public static String[] STOP_WORDS = { "", "a", "able", "about", "above", "abst", "accordance", "according",
             "accordingly", "across", "act", "actually", "added", "adj", "affected", "affecting", "affects", "after",
             "afterwards", "again", "against", "ah", "all", "almost", "alone", "along", "already", "also", "although",
@@ -82,20 +84,9 @@ public class StopWordsRemover {
      * prepared into a text file by Professor Engelhardt.
      */
 
-    public Pipe<LinkedList<String>> removing() throws InterruptedException {
-        List<String> temp = words.nextOrNullIfEmptied().stream().filter(word -> filter(word))
-                .collect(Collectors.toList());
-
-        LinkedList<String> results = new LinkedList<String>();
-        for (String lowerCaseWord : temp) {
-            results.add(lowerCaseWord);
-        }
-
-        output.put(results);
-
-        return output;
-    }
-
+    // create a filter function which return a boolean data type
+    // when the word passing in is in the stop words array return false
+    // return true for the word isn't in the stop wrods array
     private boolean filter(String word) {
         boolean noEqual = true;
         for (int j = 0; j < STOP_WORDS.length; j++) {
@@ -106,4 +97,24 @@ public class StopWordsRemover {
         }
         return noEqual;
     }
+
+    public Pipe<LinkedList<String>> removing() throws InterruptedException {
+        // mapped out each word filter out the stop words with filter function store it
+        // into a list of string
+        List<String> temp = words.nextOrNullIfEmptied().stream().filter(word -> filter(word))
+                .collect(Collectors.toList());
+        words.closeForWriting(); // close the pipe after done using
+
+        // convert the list of string to linkedlist of string
+        LinkedList<String> results = new LinkedList<String>();
+        for (String lowerCaseWord : temp) {
+            results.add(lowerCaseWord);
+        }
+
+        output.put(results); // put the result into pipe
+        output.closeForWriting(); // close the pipe after done using
+
+        return output;
+    }
+
 }

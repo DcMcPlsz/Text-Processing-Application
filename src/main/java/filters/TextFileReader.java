@@ -9,33 +9,33 @@ import pipes.Pipe;
 import pipes.PipeImpl;
 
 public class TextFileReader {
-    // private ActorRef nextActor;
-    // private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-
-    // public TextFileReader(ActorRef nextActor) {
-    // this.nextActor = nextActor;
-    // }
 
     private Pipe<String> file;
     private Pipe<LinkedList<String>> output = new PipeImpl<LinkedList<String>>();
 
+    // constructor
     public TextFileReader(Pipe<String> file) {
         this.file = file;
     }
 
     public Pipe<LinkedList<String>> reading() throws InterruptedException, FileNotFoundException {
-        // log.info("The file is received" + previousmessage);
-        LinkedList<String> lines = new LinkedList<String>();
+        LinkedList<String> lines = new LinkedList<String>(); // create a linkedlist for lines
+
+        // create a file and passing in the value of the file pipe
         File fileObject = new File(file.nextOrNullIfEmptied());
-        Scanner fileReader = new Scanner(fileObject);
+        file.closeForWriting(); // close the pipe after done using
+
+        Scanner fileReader = new Scanner(fileObject); // create a scanner
+
+        // loop through every line of the file
         while (fileReader.hasNextLine()) {
-            String data = fileReader.nextLine();
-            lines.add(data);
+            lines.add(fileReader.nextLine());// add each line into the linkedlist
         }
-        fileReader.close();
-        output.put(lines);
+
+        fileReader.close();// close the scanner after done using
+        output.put(lines); // put the result into pipe
+        output.closeForWriting(); // close the pipe after done using
         return output;
-        // nextActor.tell(lines, getSelf());
 
     }
 
