@@ -1,8 +1,5 @@
 package filtersAkka;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import akka.event.Logging;
