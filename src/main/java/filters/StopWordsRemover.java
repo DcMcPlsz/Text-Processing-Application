@@ -1,31 +1,19 @@
+package filters;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
 
-/**
- * @author Nardos Tessema
- *
- *         A central configuration class
- */
-public class Configuration {
-    /**
-     * The sentinel value signals the end of the text stream.
-     * The value is a random string generated with the openssl tool to make
-     * the chances of having the same value in the actual text stream slim.
-     *
-     * $ openssl rand -base64 32
-     */
-    public static String SENTINEL_VALUE = "ZTmlDP63gcm0d/LvvLdf4tHrtFl1rkc79IAVucfa3/A=";
-    /**
-     * The capacity of the pipes.
-     * - Same for all pipes
-     * - Value arbitrarily chosen for now
-     */
-    public static int PIPE_CAPACITY = 1024;
-    /**
-     * Stop words
-     */
+import akka.actor.ActorRef;
+import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
+
+public class StopWordsRemover extends UntypedActor {
+    private ActorRef nextActor;
+    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+
+    private LinkedList<String> input;
+    private LinkedList<String> output;
+
     public static String[] STOP_WORDS = { "a", "able", "about", "above", "abst", "accordance", "according",
             "accordingly", "across", "act", "actually", "added", "adj", "affected", "affecting", "affects", "after",
             "afterwards", "again", "against", "ah", "all", "almost", "alone", "along", "already", "also", "although",
@@ -86,26 +74,32 @@ public class Configuration {
             "whose", "why", "widely", "willing", "wish", "with", "within", "without", "wont", "words", "world", "would",
             "wouldnt", "www", "x", "y", "yes", "yet", "you", "youd", "you'll", "your", "youre", "yours", "yourself",
             "yourselves", "you've", "z", "zero" };
+
     /**
-     * The list of stop words are loaded into a HashMap
-     * to get an O(1) lookup / key searching.
      * List of words from https://www.ranks.nl/stopwords and
      * prepared into a text file by Professor Engelhardt.
      */
-    public static Map<String, Boolean> STOP_WORDS_MAP = new HashMap<>();
-    static {
-        /*
-         * The boolean value can be used to turn on/off the status
-         * of a word as a stop word. In this implementation, the value
-         * is not used since the stop word remover merely checks the
-         * presence of the key in the map. Boolean is chosen because
-         * it has the least space requirement.
-         */
-        Arrays.stream(STOP_WORDS).forEach(w -> STOP_WORDS_MAP.put(w.toLowerCase(), true));
+    public StopWordsRemover(ActorRef nextActor) {
+        this.nextActor = nextActor;
     }
 
-    /**
-     * How many parallel streams? Let's make it same for all...
-     */
-    public static int NUMBER_OF_PARALLEL_INSTANCES = 2;
+    @Override
+    public void onReceive(Object previousmessage) throws Throwable {
+        log.info("The message is received: " + previousmessage);
+
+        String message = (String) previousmessage;
+        for (int i = 0; i < ((LinkedList<String>) previousmessage).size(); i++) {
+            boolean noEqual = true;
+            for (int j = 0; j < STOP_WORDS.length; j++) {
+                if (((LinkedList<String>) previousmessage).get(i).equals(STOP_WORDS[j])) {
+                    noEqual = false;
+                    break;
+                }
+            }
+            if (noEqual) {
+                output.add(((LinkedList<String>) previousmessage).get(i));
+            }
+        }
+        nextActor.tell(output, getSelf());
+    }
 }
